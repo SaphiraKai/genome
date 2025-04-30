@@ -273,6 +273,7 @@ pub type Expression {
     return: Option(Type),
     body: List(Statement),
   )
+  Tuple(List(Expression))
 }
 
 fn expression_from_glance(glance_expression: glance.Expression) -> Expression {
@@ -340,7 +341,7 @@ fn expression_from_glance(glance_expression: glance.Expression) -> Expression {
       )
     glance.String(s) -> String(s)
     glance.Todo(_) -> todo
-    glance.Tuple(_) -> todo
+    glance.Tuple(e) -> Tuple(list.map(e, expression_from_glance))
     glance.TupleIndex(_, _) -> todo
     glance.Variable(v) -> Variable(None, v)
   }
@@ -427,6 +428,8 @@ fn expression_to_string(this expression: Expression) -> String {
       <> list.map(body, fn(a) { "  " <> statement_to_string(a) })
       |> string.join("\n")
       <> "\n}"
+    Tuple(e) ->
+      "#(" <> list.map(e, expression_to_string) |> string.join(", ") <> ")"
   }
 }
 
