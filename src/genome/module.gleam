@@ -495,7 +495,7 @@ pub fn type_to_string(this type_: Type) -> String {
 }
 
 pub type Variant {
-  Variant(name: String, fields: List(#(String, Type)))
+  Variant(name: String, fields: List(#(String, Option(Type))))
 }
 
 fn variant_from_glance(glance_variant: glance.Variant) -> Variant {
@@ -503,8 +503,8 @@ fn variant_from_glance(glance_variant: glance.Variant) -> Variant {
     glance_variant.fields
     |> list.map(fn(a) {
       case a {
-        glance.LabelledVariantField(t, l) -> #(l, type_from_glance(t))
-        glance.UnlabelledVariantField(t) -> #("", type_from_glance(t))
+        glance.LabelledVariantField(t, l) -> #(l, Some(type_from_glance(t)))
+        glance.UnlabelledVariantField(t) -> #("", Some(type_from_glance(t)))
       }
     })
 
@@ -512,12 +512,13 @@ fn variant_from_glance(glance_variant: glance.Variant) -> Variant {
 }
 
 fn variant_to_string(this variant: Variant) -> String {
-  let field_to_string = fn(a: #(String, Type)) {
-    case a.0 {
-      "" -> ""
-      l -> l <> ": "
+  let field_to_string = fn(a: #(String, Option(Type))) {
+    case a.0, a.1 {
+      "", None -> ""
+      "", Some(t) -> type_to_string(t)
+      l, None -> l
+      l, Some(t) -> l <> ": " <> type_to_string(t)
     }
-    <> type_to_string(a.1)
   }
 
   variant.name
