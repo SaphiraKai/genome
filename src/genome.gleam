@@ -145,14 +145,14 @@ fn run() -> Result(Nil, Error) {
     |> result.map_error(Simplifile(_, "failed to remove ./build/genome/")),
   )
   use _ <- result.try(
-    simplifile.delete("./generated_")
+    simplifile.delete("./src/generated_")
     |> result.try_recover(fn(e) {
       case e {
         simplifile.Enoent -> Ok(Nil)
         e -> Error(e)
       }
     })
-    |> result.map_error(Simplifile(_, "failed to remove ./generated_/")),
+    |> result.map_error(Simplifile(_, "failed to remove ./src/generated_/")),
   )
   use _ <- result.try(
     simplifile.create_directory_all("./build/genome")
